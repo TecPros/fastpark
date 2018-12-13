@@ -1,22 +1,22 @@
 import React from "react";
 import {
   Card,
-  CardImg,
-  CardText,
   CardBody,
   Form,
-  CardTitle,
-  CardSubtitle,
-  Button
 } from "reactstrap";
+
 import "../style/Home.css";
 import { Link } from "react-router-dom";
-import $ from "jquery";
+import TimePicker from 'react-time-picker';
+
+
 class CardHome extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      inputValue: ""
+      inputValue: "",
+      startTime: '00:00',
+      endTime: '23:59'
     };
   }
   updateInputValue(evt) {
@@ -24,11 +24,15 @@ class CardHome extends React.Component {
       inputValue: evt.target.value
     });
   }
+
+  onChangeStart = startTime => this.setState({ startTime });
+  onChangeEnd = endTime => this.setState({ endTime });
+
   render() {
     return (
       <div>
         <Card id="homecard">
-          <h4>Choose your Park anywhere any time .</h4>
+          <h4>Your <em>favorite</em> Park anywhere any time.</h4>
           <CardBody>
             <label htmlFor="Where">Where</label>
             <input
@@ -46,29 +50,30 @@ class CardHome extends React.Component {
                 End
               </label>
             </Form>
-            <Form inline>
-              <input
-                type="text"
-                className="form-control"
-                id="Start"
-                placeholder="Start Hour"
-              />
-              <input
-                type="text"
-                className="form-control"
-                id="End"
-                placeholder="End Hour"
-              />
-            </Form>
+
+            <TimePicker
+              onChange={this.onChangeStart}
+              value={this.state.startTime}
+              className={["timepicker1", "searchbtn"]}
+              clockClassName="clock"
+            />
+
+            <TimePicker
+              onChange={this.onChangeEnd}
+              value={this.state.endTime}
+              className={["timepicker2", "searchbtn"]}
+              clockClassName="clock"
+            />
+
             <Link
               to={{
                 pathname: "/SearchResults",
-                query: this.state.inputValue.toLowerCase()
+                query: this.state.inputValue.toLowerCase(),
+                state: { startTime: this.state.startTime, endTime: this.state.endTime }
               }}
+              className="btn btn-info"
             >
-              <Button color="primary" id="btn" href="/searchresults">
-                Search
-              </Button>
+              Search
             </Link>
           </CardBody>
         </Card>
@@ -76,4 +81,5 @@ class CardHome extends React.Component {
     );
   }
 }
+
 export default CardHome;

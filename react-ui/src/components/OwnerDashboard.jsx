@@ -4,9 +4,10 @@ import ParkPop from "./ParkPop.jsx";
 import $ from "jquery";
 import "../style/AddPark.css";
 import { storage } from "../firebase/index";
-import OwnerDashboardParkList from "./OwnerDashboardParkList";
+import OwnerDashboardParkList from "./OwnerDashboardParkList.jsx";
 import { Bounce } from "react-activity";
 import "react-activity/dist/react-activity.css";
+
 class OwnerDashboard extends React.Component {
   constructor(props) {
     super(props);
@@ -17,9 +18,10 @@ class OwnerDashboard extends React.Component {
       ownerId: "5c026ba1548c172ce9294538",
       parks: [],
       isBouncing: false,
-      isDeleted : false
+      isDeleted: false
     };
   }
+
   componentDidMount() {
     $("#root").css("background", "white");
     this.getLocation(location => {
@@ -27,6 +29,7 @@ class OwnerDashboard extends React.Component {
     });
     this.fetchParks();
   }
+
   fetchParks() {
     $.ajax({
       url: "/parks",
@@ -36,11 +39,12 @@ class OwnerDashboard extends React.Component {
       success: parks => {
         this.setState({ parks });
       },
-      error: function(error) {
+      error: function (error) {
         console.error("errorrrrrr", error);
       }
     });
   }
+
   getLocation(cb) {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(position => {
@@ -53,6 +57,7 @@ class OwnerDashboard extends React.Component {
       console.log("Geolocation is not supported by this browser.");
     }
   }
+
   saveToDB = data => {
     $.ajax({
       url: "/addpark",
@@ -64,70 +69,81 @@ class OwnerDashboard extends React.Component {
         this.setState({ isBouncing: false });
         this.fetchParks();
       },
-      error: function(error) {
+      error: function (error) {
         console.error("errorrrrrr", error);
       }
     });
   };
-  handleAddButtonClick = (image, cb) => {
-    this.setState({ isBouncing: true });
-    //starting put request to firebase storage
-    const uploadTask = storage.ref(`images/${image.name}`).put(image);
-    //the on function is event listener that provide 3 functions progress,error,complete
-    uploadTask.on(
-      "state_changed",
-      snapshot => {
-        // progress function
-      },
-      error => {
-        // error function
-        console.log("errr", error);
-      },
-      () => {
-        // complete function
-        storage
-          .ref("images")
-          .child(image.name)
-          .getDownloadURL()
-          .then(url => {
-            const park = {
-              title: $("#addParkTitle").val(),
-              description: $("#addParkDescription").val(),
-              location: $("#addParkArea")
-                .val()
-                .toLowerCase(),
-              startTime: $("#addParkStart").val(),
-              endTime: $("#addParkEnd").val(),
-              price: `${$("#addParkPrice").val()} JD`,
-              image: url,
-              lat: this.state.lat,
-              long: this.state.long,
-              ownerId: this.state.ownerId
-            };
-            this.saveToDB(park);
-            cb(true);
-          });
-      }
-    );
-  };
-  handleDeleteClick = (parkId)=>{
-    $.ajax({
-        url: "/deletepark",
-        type: "DELETE",
-        data: JSON.stringify({
-          parkId: parkId
 
-        }),
-        contentType: "application/json",
-        success: (data)=> {
-          console.log("pleasssssss", data);
-          this.fetchParks();
+  handleAddButtonClick = (image, cb) => {
+    //handle the exception when no image file is selected
+    try {
+      this.setState({ isBouncing: true });
+      //starting put request to firebase storage
+      const uploadTask = storage.ref(`images/${image.name}`).put(image);
+      //the on function is event listener that provide 3 functions progress,error,complete
+      uploadTask.on(
+        "state_changed",
+        snapshot => {
+          // progress function
         },
-        error: function(error) {
-          console.error("errorrrrrr", error);
+        error => {
+          // error function
+          console.log("errr", error);
+        },
+        () => {
+          // complete function
+          storage
+            .ref("images")
+            .child(image.name)
+            .getDownloadURL()
+            .then(url => {
+              const park = {
+                title: $("#addParkTitle").val(),
+                description: $("#addParkDescription").val(),
+                location: $("#addParkArea")
+                  .val()
+                  .toLowerCase(),
+                startTime: $("#addParkStart").val(),
+                endTime: $("#addParkEnd").val(),
+                price: `${$("#addParkPrice").val()} JD`,
+                image: url,
+                lat: this.state.lat,
+                long: this.state.long,
+                ownerId: this.state.ownerId
+              };
+              this.saveToDB(park);
+              cb(true);
+            });
         }
-      });
+      );
+    } catch (error) {
+      alert('Error: No image!');
+      console.log('Error: No image!')
+    } finally {
+      this.setState({ isBouncing: false });
+    }
+  };
+
+  handleDeleteClick = (parkId) => {
+    $.ajax({
+      url: "/deletepark",
+      type: "DELETE",
+      data: JSON.stringify({
+        parkId: parkId
+
+      }),
+      contentType: "application/json",
+      success: (data) => {
+        console.log("pleasssssss", data);
+        this.fetchParks();
+      },
+      error: function (error) {
+        console.error("errorrrrrr", error);
+      }
+    });
   }
+
   render() {
     return (
       <div>
@@ -135,7 +151,7 @@ class OwnerDashboard extends React.Component {
           <Bounce className="bouncy" animating={this.state.isBouncing} />
           <ParkPop handleAddClick={this.handleAddButtonClick} />
         </div>
-       <OwnerDashboardParkList parks={this.state.parks} handleDelete ={this.handleDeleteClick} />
+        <OwnerDashboardParkList parks={this.state.parks} handleDelete={this.handleDeleteClick} />
       </div>
     );
   }

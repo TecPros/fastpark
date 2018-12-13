@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "How to use create-react-app with a custom Node API on Heroku",
   "engines": {
-    "node": "8.9.x"
+    "node": "10.0.x"
   },
   "scripts": {
     "start": "node server",
@@ -11,6 +11,7 @@
     "client": "cd react-ui && npm run start",
     "client-install": "cd react-ui && npm install",
     "test": "mocha test/test.js",
+    "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"",
     "heroku-postbuild": "cd react-ui/ && npm install && npm install --only=dev --no-shrinkwrap && npm run build"
   },
   "cacheDirectories": [
@@ -18,13 +19,17 @@
     "react-ui/node_modules"
   ],
   "dependencies": {
-    "bcrypt": "^3.0.2",
+    "bcrypt": "^2.0.0",
     "body-parser": "^1.18.3",
     "chai": "^4.2.0",
+    "concurrently": "^4.1.0",
     "express": "^4.16.3",
     "jquery": "^3.3.1",
     "mongoose": "^5.3.14",
-    "supertest": "^3.3.0"
+    "react-facebook-login": "^4.1.1",
+    "react-time-picker": "^3.1.1",
+    "supertest": "^3.3.0",
+    "yarn": "^1.12.3"
   },
   "repository": {
     "type": "git",
